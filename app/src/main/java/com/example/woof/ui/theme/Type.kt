@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.woof.R
 
-val AbrilFatFace = FontFamily(
+val AbrilFatFace = FontFamily( // this initializes the fonts
     Font(R.font.abril_fatface_regular)
 )
 

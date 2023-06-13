@@ -5,16 +5,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,13 +31,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.woof.data.Dog
 import com.example.woof.data.dogs
 import com.example.woof.ui.theme.WoofTheme
 
@@ -73,10 +86,63 @@ fun WoofApp() {
     }
 }
 
+@Composable
+fun DogItem(
+    dog: Dog,
+    modifier: Modifier = Modifier
+){
+    var expanded by remember { mutableStateOf(false) }
+
+    Card (
+        modifier = modifier
+    ){
+        Column(
+            modifier = modifier
+                .animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+        )
+        {
+
+            Row (
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.padding_small))
+            ) {
+                DogIcon(dogIcon = dog.imageResourceId)
+                DogInformation(dogName = dog.name, dogAge = dog.age)
+                Spacer(modifier = modifier.weight(1f))
+                DogItemButton(
+                    expanded = expanded,
+                    onClick = { expanded = !expanded })
+
+            }
+            if (expanded) {
+                DogHobby(
+                    dogHobby = dog.hobbies,
+                    modifier = Modifier.padding(
+                        start = dimensionResource(id = R.dimen.padding_medium),
+                        top = dimensionResource(id = R.dimen.padding_small),
+                        end = dimensionResource(id = R.dimen.padding_medium),
+                        bottom = dimensionResource(id = R.dimen.padding_medium)
+                    )
+                )
+            }
+
+        }
+    }
+
+
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WoofTopAppBar(modifier: Modifier = Modifier) {
+
     CenterAlignedTopAppBar(
         title = {
             Row(
@@ -98,6 +164,7 @@ fun WoofTopAppBar(modifier: Modifier = Modifier) {
         },
         modifier = modifier
     )
+
 }
 
 @Composable
@@ -111,6 +178,7 @@ fun DogIcon(
             .padding(dimensionResource(id = R.dimen.padding_small))
             .clip(MaterialTheme.shapes.small)
         ,
+        contentScale = ContentScale.Crop,
         painter = painterResource(dogIcon),
         contentDescription = null )
 }
@@ -135,7 +203,7 @@ fun DogInformation(
     }
 }
 
-var
+
 
 @Composable
 private fun DogItemButton(
@@ -148,9 +216,29 @@ private fun DogItemButton(
         modifier = modifier
     ){
         Icon(
-            imageVector = Icons.Filled.ExpandMore,
+            imageVector = if (expanded) Icons.Filled.ExpandMore else Icons.Filled.ExpandLess,
             contentDescription = stringResource(id = R.string.expand_button_content_description),
             tint = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
+
+@Composable
+fun DogHobby(
+    @StringRes dogHobby: Int,
+    modifier: Modifier = Modifier
+){
+    Column (
+        modifier = modifier
+    ) {
+        Text(
+            text = stringResource(id = R.string.about),
+            style = MaterialTheme.typography.labelSmall
+        )
+
+        Text(
+            text = stringResource(id = dogHobby),
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }
